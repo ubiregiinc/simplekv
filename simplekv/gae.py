@@ -1,7 +1,13 @@
 #!/usr/bin/env python
 # coding=utf8
 
-from cStringIO import StringIO
+import sys
+
+
+if sys.version_info[0] == 2:
+    from cStringIO import StringIO
+else:
+    from io import StringIO
 
 from google.appengine.ext import ndb
 
@@ -29,9 +35,7 @@ class NdbStore(KeyValueStore):
 
     def iter_keys(self, prefix=u""):
         qry_iter = self.obj_class.query().iter(keys_only=True)
-        return filter(lambda k: k.string_id().startswith(prefix),
-                      (k.string_id() for k in qry_iter)
-                      )
+        return [k for k in (k.string_id() for k in qry_iter) if k.string_id().startswith(prefix)]
 
     def _open(self, key):
         return StringIO(self._get(key))
